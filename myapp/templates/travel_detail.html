@@ -1,0 +1,215 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ attraction.name }} - 旅游信息管理系统{% endblock %}
+
+{% block css %}
+<style>
+    .detail-card {
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    .detail-img {
+        width: 100%;
+        max-height: 400px;
+        object-fit: cover;
+    }
+    .detail-info {
+        padding: 30px;
+    }
+    .detail-title {
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+    .detail-meta {
+        color: #666;
+        margin-bottom: 15px;
+    }
+    .detail-price {
+        color: #e74c3c;
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+    .detail-desc {
+        line-height: 1.8;
+        color: #333;
+    }
+    .comment-section {
+        background: #fff;
+        border-radius: 8px;
+        padding: 30px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .comment-item {
+        border-bottom: 1px solid #eee;
+        padding: 15px 0;
+    }
+    .comment-item:last-child {
+        border-bottom: none;
+    }
+    .comment-user {
+        font-weight: bold;
+        color: #333;
+    }
+    .comment-time {
+        color: #999;
+        font-size: 12px;
+    }
+    .comment-content {
+        margin-top: 10px;
+        color: #666;
+    }
+    .favorite-btn {
+        cursor: pointer;
+    }
+    .favorite-btn.active {
+        color: #e74c3c;
+    }
+    .no-image {
+        width: 100%;
+        height: 300px;
+        background: #eee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #999;
+        font-size: 18px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <!-- 景点详情 -->
+        <div class="detail-card">
+            {% if attraction.image %}
+                <img src="{{ attraction.image.url }}" class="detail-img" alt="{{ attraction.name }}">
+            {% else %}
+                <div class="no-image">暂无图片</div>
+            {% endif %}
+            <div class="detail-info">
+                <div class="detail-title">
+                    {{ attraction.name }}
+                    {% if request.session.info.role == 'user' %}
+                        <span class="favorite-btn {% if is_favorite %}active{% endif %}"
+                              data-id="{{ attraction.id }}" title="收藏">
+                            <i class="glyphicon glyphicon-heart"></i>
+                        </span>
+                    {% endif %}
+                </div>
+                <div class="detail-meta">
+                    <i class="glyphicon glyphicon-map-marker"></i> {{ attraction.city }}
+                    &nbsp;&nbsp;|&nbsp;&nbsp;
+                    <i class="glyphicon glyphicon-time"></i> {{ attraction.create_time|date:"Y-m-d" }}
+                </div>
+                <div class="detail-price">
+                    {% if attraction.price > 0 %}
+                        门票：¥{{ attraction.price }}
+                    {% else %}
+                        免费开放
+                    {% endif %}
+                </div>
+                <div class="detail-desc">
+                    {{ attraction.description|linebreaks|default:"暂无简介" }}
+                </div>
+            </div>
+        </div>
+
+        <!-- 评论区 -->
+        <div class="comment-section">
+            <h4>评论区 ({{ comments|length }})</h4>
+            <hr>
+
+            {% if request.session.info %}
+                <form method="post" action="/comment/add/{{ attraction.id }}/">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        {{ form.content }}
+                        <span class="text-danger">{{ form.content.errors.0 }}</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">发表评论</button>
+                </form>
+                <hr>
+            {% else %}
+                <div class="alert alert-info">
+                    <a href="/login/">登录</a> 后才能发表评论
+                </div>
+            {% endif %}
+
+            <div class="comment-list">
+                {% for comment in comments %}
+                    <div class="comment-item">
+                        <div class="comment-user">
+                            {{ comment.user.username }}
+                            <span class="comment-time">{{ comment.create_time|date:"Y-m-d H:i" }}</span>
+                            {% if request.session.info.role == 'admin' or request.session.info.id == comment.user_id %}
+                                <a href="/comment/{{ comment.id }}/del/" class="btn btn-xs btn-danger pull-right"
+                                   onclick="return confirm('确定删除此评论？')">删除</a>
+                            {% endif %}
+                        </div>
+                        <div class="comment-content">{{ comment.content }}</div>
+                    </div>
+                {% empty %}
+                    <div class="text-center text-muted">暂无评论</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- 侧边信息 -->
+        <div class="panel panel-default">
+            <div class="panel-heading">景点信息</div>
+            <div class="panel-body">
+                <p><strong>景点名称：</strong>{{ attraction.name }}</p>
+                <p><strong>所在城市：</strong>{{ attraction.city }}</p>
+                <p><strong>门票价格：</strong>
+                    {% if attraction.price > 0 %}¥{{ attraction.price }}{% else %}免费{% endif %}
+                </p>
+                <p><strong>收藏人数：</strong>{{ attraction.favorite_count }}</p>
+                <p><strong>评论数量：</strong>{{ attraction.comment_count }}</p>
+            </div>
+        </div>
+
+        <a href="/travel/list/" class="btn btn-default btn-block">返回列表</a>
+
+        {% if request.session.info.role == 'admin' %}
+            <a href="/travel/{{ attraction.id }}/update/" class="btn btn-primary btn-block" style="margin-top: 10px;">编辑景点</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+$(function() {
+    // 收藏功能
+    $('.favorite-btn').click(function() {
+        var $this = $(this);
+        var attractionId = $this.data('id');
+
+        $.ajax({
+            url: '/favorite/toggle/' + attractionId + '/',
+            type: 'GET',
+            success: function(res) {
+                if (res.status) {
+                    if (res.is_favorite) {
+                        $this.addClass('active');
+                    } else {
+                        $this.removeClass('active');
+                    }
+                    alert(res.message);
+                } else {
+                    alert(res.error);
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

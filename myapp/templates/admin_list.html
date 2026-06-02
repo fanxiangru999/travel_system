@@ -1,0 +1,58 @@
+{% extends 'layout.html' %}
+
+{% block title %}管理员列表 - 旅游信息管理系统{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="row" style="margin-bottom: 15px;">
+        <div class="col-md-6">
+            <a href="/admin/add/" class="btn btn-success">
+                <i class="glyphicon glyphicon-plus"></i> 新增管理员
+            </a>
+        </div>
+        <div class="col-md-6">
+            <form method="get" class="form-inline pull-right">
+                <div class="form-group">
+                    <input type="text" name="q" class="form-control" placeholder="搜索用户名..." value="{{ search_data }}">
+                </div>
+                <button type="submit" class="btn btn-primary">搜索</button>
+            </form>
+        </div>
+    </div>
+
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>用户名</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for obj in queryset %}
+                <tr>
+                    <td>{{ obj.id }}</td>
+                    <td>{{ obj.username }}</td>
+                    <td>
+                        <a href="/admin/{{ obj.id }}/update/" class="btn btn-xs btn-primary">编辑</a>
+                        <a href="/admin/{{ obj.id }}/reset/" class="btn btn-xs btn-warning">重置密码</a>
+                        <a href="/admin/{{ obj.id }}/del/" class="btn btn-xs btn-danger"
+                           onclick="return confirm('确定删除此管理员？')">删除</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center">暂无数据</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- 分页 -->
+    <nav class="text-center">
+        <ul class="pagination">
+            {{ page_string }}
+        </ul>
+    </nav>
+</div>
+{% endblock %}

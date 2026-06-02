@@ -1,0 +1,60 @@
+{% extends 'layout.html' %}
+
+{% block title %}用户列表 - 旅游信息管理系统{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="row" style="margin-bottom: 15px;">
+        <div class="col-md-6">
+            <h4>用户管理</h4>
+        </div>
+        <div class="col-md-6">
+            <form method="get" class="form-inline pull-right">
+                <div class="form-group">
+                    <input type="text" name="q" class="form-control" placeholder="搜索用户名..." value="{{ search_data }}">
+                </div>
+                <button type="submit" class="btn btn-primary">搜索</button>
+            </form>
+        </div>
+    </div>
+
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>用户名</th>
+                <th>昵称</th>
+                <th>邮箱</th>
+                <th>注册时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for obj in queryset %}
+                <tr>
+                    <td>{{ obj.id }}</td>
+                    <td>{{ obj.username }}</td>
+                    <td>{{ obj.nickname|default:"-" }}</td>
+                    <td>{{ obj.email|default:"-" }}</td>
+                    <td>{{ obj.create_time|date:"Y-m-d H:i" }}</td>
+                    <td>
+                        <a href="/user/{{ obj.id }}/del/" class="btn btn-xs btn-danger"
+                           onclick="return confirm('确定删除此用户？删除后该用户的评论和收藏也将被删除。')">删除</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">暂无数据</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- 分页 -->
+    <nav class="text-center">
+        <ul class="pagination">
+            {{ page_string }}
+        </ul>
+    </nav>
+</div>
+{% endblock %}

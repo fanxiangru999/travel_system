@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}旅游信息管理与推荐系统{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-3.4.1/css/bootstrap.min.css' %}">
+    <style>
+        body {
+            padding-top: 70px;
+            background-color: #f5f5f5;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .content-wrapper {
+            min-height: calc(100vh - 140px);
+        }
+        .footer {
+            background-color: #333;
+            color: #fff;
+            padding: 20px 0;
+            margin-top: 40px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+    </style>
+    {% block css %}{% endblock %}
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/travel/list/">旅游信息系统</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+                <ul class="nav navbar-nav">
+                    <li><a href="/travel/list/">景点浏览</a></li>
+                    {% if request.session.info %}
+                        {% if request.session.info.role == 'user' %}
+                            <li><a href="/favorite/list/">我的收藏</a></li>
+                        {% elif request.session.info.role == 'admin' %}
+                            <li><a href="/travel/add/">新增景点</a></li>
+                            <li><a href="/admin/list/">管理员管理</a></li>
+                            <li><a href="/user/list/">用户管理</a></li>
+                            <li><a href="/chart/list/">数据统计</a></li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    {% if request.session.info %}
+                        <li><a href="#">{{ request.session.info.username }}
+                            {% if request.session.info.role == 'admin' %}
+                                <span class="label label-danger">管理员</span>
+                            {% endif %}
+                        </a></li>
+                        <li><a href="/logout/">退出</a></li>
+                    {% else %}
+                        <li><a href="/login/">登录</a></li>
+                        <li><a href="/register/">注册</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <div class="content-wrapper">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container text-center">
+            <p>旅游信息管理与推荐系统 &copy; 2024</p>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+    <script src="{% static 'plugins/bootstrap-3.4.1/js/bootstrap.min.js' %}"></script>
+    {% block js %}{% endblock %}
+</body>
+</html>

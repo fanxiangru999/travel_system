@@ -1,0 +1,86 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 旅游信息管理系统</title>
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-3.4.1/css/bootstrap.min.css' %}">
+    <style>
+        body {
+            background-color: #667eea;
+            background-image: url("{% static 'img/unnamed.jpg' %}");
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-box {
+            background: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 400px;
+        }
+        .login-box h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .form-group label {
+            font-weight: normal;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: #fff;
+            font-size: 16px;
+        }
+        .btn-login:hover {
+            opacity: 0.9;
+            color: #fff;
+        }
+        .code-img {
+            cursor: pointer;
+            height: 34px;
+        }
+        .links {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h2>用户登录</h2>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    {% if field.name == 'code' %}
+                        <div class="input-group">
+                            {{ field }}
+                            <span class="input-group-addon" style="padding: 0;">
+                                <img src="/image/code/" class="code-img" onclick="this.src='/image/code/?t=' + Math.random()">
+                            </span>
+                        </div>
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+                    <span class="text-danger">{{ field.errors.0 }}</span>
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-login">登录</button>
+        </form>
+        <div class="links">
+            <a href="/register/">没有账号？立即注册</a>
+        </div>
+    </div>
+</body>
+</html>

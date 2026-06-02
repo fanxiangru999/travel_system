@@ -1,0 +1,170 @@
+{% extends 'layout.html' %}
+
+{% block title %}景点浏览 - 旅游信息管理系统{% endblock %}
+
+{% block css %}
+<style>
+    .attraction-card {
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+        transition: transform 0.3s;
+    }
+    .attraction-card:hover {
+        transform: translateY(-5px);
+    }
+    .attraction-img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+    .attraction-info {
+        padding: 15px;
+    }
+    .attraction-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #333;
+    }
+    .attraction-city {
+        color: #666;
+        margin-bottom: 5px;
+    }
+    .attraction-price {
+        color: #e74c3c;
+        font-size: 18px;
+        font-weight: bold;
+    }
+    .search-box {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .favorite-btn {
+        cursor: pointer;
+        font-size: 20px;
+    }
+    .favorite-btn.active {
+        color: #e74c3c;
+    }
+    .no-image {
+        width: 100%;
+        height: 200px;
+        background: #eee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #999;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 搜索区域 -->
+<div class="search-box">
+    <form method="get" class="form-inline">
+        <div class="form-group">
+            <input type="text" name="q" class="form-control" placeholder="搜索景点名称..." value="{{ search_data }}">
+        </div>
+        <div class="form-group" style="margin-left: 15px;">
+            <select name="city" class="form-control">
+                <option value="">全部城市</option>
+                {% for c in cities %}
+                    <option value="{{ c }}" {% if c == city %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="margin-left: 15px;">搜索</button>
+        <a href="/travel/list/" class="btn btn-default" style="margin-left: 10px;">重置</a>
+    </form>
+</div>
+
+<!-- 景点列表 -->
+<div class="row">
+    {% for attraction in queryset %}
+        <div class="col-md-4">
+            <div class="attraction-card">
+                <a href="/travel/detail/{{ attraction.id }}/">
+                    {% if attraction.image %}
+                        <img src="{{ attraction.image.url }}" class="attraction-img" alt="{{ attraction.name }}">
+                    {% else %}
+                        <div class="no-image">暂无图片</div>
+                    {% endif %}
+                </a>
+                <div class="attraction-info">
+                    <div class="attraction-title">
+                        <a href="/travel/detail/{{ attraction.id }}/" style="color: #333; text-decoration: none;">{{ attraction.name }}</a>
+                        {% if request.session.info.role == 'user' %}
+                            <span class="favorite-btn pull-right {% if attraction.id in user_favorites %}active{% endif %}"
+                                  data-id="{{ attraction.id }}" title="收藏">
+                                <i class="glyphicon glyphicon-heart"></i>
+                            </span>
+                        {% endif %}
+                    </div>
+                    <div class="attraction-city">
+                        <i class="glyphicon glyphicon-map-marker"></i> {{ attraction.city }}
+                    </div>
+                    <div class="attraction-price">
+                        {% if attraction.price > 0 %}
+                            ¥{{ attraction.price }}
+                        {% else %}
+                            免费
+                        {% endif %}
+                    </div>
+                    {% if request.session.info.role == 'admin' %}
+                        <div style="margin-top: 10px;">
+                            <a href="/travel/{{ attraction.id }}/update/" class="btn btn-xs btn-primary">编辑</a>
+                            <a href="/travel/{{ attraction.id }}/del/" class="btn btn-xs btn-danger"
+                               onclick="return confirm('确定删除此景点？')">删除</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-md-12">
+            <div class="alert alert-info text-center">暂无景点数据</div>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- 分页 -->
+<nav class="text-center">
+    <ul class="pagination">
+        {{ page_string }}
+    </ul>
+</nav>
+{% endblock %}
+
+{% block js %}
+<script>
+$(function() {
+    // 收藏功能
+    $('.favorite-btn').click(function() {
+        var $this = $(this);
+        var attractionId = $this.data('id');
+
+        $.ajax({
+            url: '/favorite/toggle/' + attractionId + '/',
+            type: 'GET',
+            success: function(res) {
+                if (res.status) {
+                    if (res.is_favorite) {
+                        $this.addClass('active');
+                    } else {
+                        $this.removeClass('active');
+                    }
+                } else {
+                    alert(res.error);
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
