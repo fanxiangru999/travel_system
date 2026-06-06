@@ -60,85 +60,16 @@ travel_system/
 - **Comment**：评论（关联用户与景点、内容、时间）
 - **Favorite**：收藏（关联用户与景点，同一用户对同一景点不可重复收藏）
 
-## 快速开始
-
-### 1. 环境要求
+## 环境要求
 
 - Python 3.12 及以上
 - MySQL 数据库服务
 
-### 2. 安装依赖
-
-```bash
-pip install django==4.2.8 mysqlclient Pillow
-```
-
-> 若 `mysqlclient` 安装失败，可改用 `pip install pymysql`，并在 `travel_system/__init__.py` 中加入：
-> ```python
-> import pymysql
-> pymysql.install_as_MySQLdb()
-> ```
-
-### 3. 配置数据库
-
-先在 MySQL 中创建数据库：
-
-```sql
-CREATE DATABASE travel_db CHARACTER SET utf8;
-```
-
-数据库连接信息在 `travel_system/settings.py` 中配置，默认如下，请按实际环境修改：
-
-```python
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "travel_db",
-        "USER": "root",
-        "PASSWORD": "123456",
-        "HOST": "127.0.0.1",
-        "PORT": 3306,
-    }
-}
-```
-
-### 4. 执行数据库迁移
-
-```bash
-python manage.py migrate
-```
-
-### 5. 创建初始管理员账号
-
-本系统使用自定义的 `Admin` 表（非 Django 内置后台），密码以 MD5 + 盐值加密存储，需通过 shell 创建首个管理员：
-
-```bash
-python manage.py shell
-```
-
-```python
-from myapp.models import Admin
-from myapp.utils.encrypt import md5
-Admin.objects.create(username="admin", password=md5("admin123"))
-```
-
-### 6. （可选）下载景点示例图片
+## 下载景点示例图片
 
 ```bash
 python download_images.py
 ```
-
-### 7. 启动服务
-
-```bash
-python manage.py runserver
-```
-
-浏览器访问 http://127.0.0.1:8000/ ，将自动跳转到景点列表页。
-
-- 普通用户：通过注册页面自行注册后登录
-- 管理员：使用上一步创建的账号登录，登录后进入数据统计页
-
 ## 主要路由
 
 | 路径 | 说明 |
